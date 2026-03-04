@@ -200,6 +200,7 @@
     try {
       await DB.updateCount(prayer, newVal);
       showSaved();
+      checkAutoBackup();
     } catch (e) {
       console.error('Save failed:', e);
       showSaveError();
@@ -236,6 +237,7 @@
     try {
       await DB.updateCount(prayer, newVal);
       showSaved();
+      checkAutoBackup();
     } catch (e) {
       console.error('Save failed:', e);
       showSaveError();
@@ -511,6 +513,59 @@
     importFile.value = '';
   });
 
+  // --- Auto-backup to localStorage ---
+  const BACKUP_KEY = 'qada-auto-backup';
+  const BACKUP_EVERY_TAPS = 20;
+  const BACKUP_EVERY_MS = 20 * 60 * 1000; // 20 minutes
+  let tapsSinceBackup = 0;
+
+  function autoBackup() {
+    try {
+      const data = JSON.stringify({ counts, backedUpAt: new Date().toISOString() });
+      localStorage.setItem(BACKUP_KEY, data);
+      tapsSinceBackup = 0;
+    } catch (e) {
+      console.warn('Auto-backup failed:', e);
+    }
+  }
+
+  function checkAutoBackup() {
+    tapsSinceBackup++;
+    if (tapsSinceBackup >= BACKUP_EVERY_TAPS) {
+      autoBackup();
+    }
+  }
+
+  // Timer-based backup every 20 minutes
+  setInterval(autoBackup, BACKUP_EVERY_MS);
+
+  // Restore from localStorage if IndexedDB is empty (got wiped)
+  async function tryRestoreFromBackup() {
+    const total = PRAYERS.reduce((s, p) => s + (counts[p] || 0), 0);
+    if (total > 0) return; // IndexedDB has data, no need to restore
+
+    const raw = localStorage.getItem(BACKUP_KEY);
+    if (!raw) return;
+
+    try {
+      const backup = JSON.parse(raw);
+      if (!backup.counts) return;
+
+      // Check backup actually has data
+      const backupTotal = PRAYERS.reduce((s, p) => s + (backup.counts[p] || 0), 0);
+      if (backupTotal === 0) return;
+
+      // Restore
+      counts = backup.counts;
+      for (const p of PRAYERS) {
+        await DB.updateCount(p, counts[p] || 0);
+      }
+      console.log('Restored from auto-backup dated', backup.backedUpAt);
+    } catch (e) {
+      console.warn('Auto-restore failed:', e);
+    }
+  }
+
   // --- Service Worker ---
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js').catch(() => {});
@@ -521,6 +576,8 @@
     try {
       await DB.init();
       counts = await DB.getCounts();
+      await tryRestoreFromBackup();
+      autoBackup(); // initial backup on load
       buildDots();
       renderCurrent();
       updateTotal();
