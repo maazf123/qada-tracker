@@ -51,6 +51,7 @@
   // --- Save indicator ---
   let saveTimeout = null;
   function showSaved() {
+    if (saveIndicator.className === 'backed-up') return; // don't override backup toast
     saveIndicator.textContent = '\u2713 Saved';
     saveIndicator.className = 'saved';
     clearTimeout(saveTimeout);
@@ -532,10 +533,11 @@
 
   let backupTimeout = null;
   function showBackedUp() {
+    clearTimeout(saveTimeout);
+    clearTimeout(backupTimeout);
     saveIndicator.textContent = '\u2601 Backed up';
     saveIndicator.className = 'backed-up';
-    clearTimeout(backupTimeout);
-    backupTimeout = setTimeout(() => { saveIndicator.className = ''; }, 2000);
+    backupTimeout = setTimeout(() => { saveIndicator.className = ''; }, 2500);
   }
 
   function checkAutoBackup() {
