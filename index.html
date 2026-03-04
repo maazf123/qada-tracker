@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f0f0f">
+  <title>Qada Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="save-indicator"></div>
+
+<!-- Home -->
+<div id="screen-home" class="screen active">
+  <div id="total-remaining"></div>
+
+  <div class="carousel">
+    <button id="arrow-left" class="arrow arrow-left" aria-label="Previous prayer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="carousel-content">
+      <div class="prayer-name" id="prayer-name"></div>
+      <div class="prayer-count-wrapper">
+        <div class="prayer-count" id="prayer-count"></div>
+        <button class="edit-count-btn" id="edit-btn" aria-label="Edit count">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </button>
+        <input type="number" class="prayer-count-input" id="prayer-input" min="0" inputmode="numeric" style="display:none">
+      </div>
+      <div class="prayer-progress"><div class="prayer-progress-fill" id="prayer-progress"></div></div>
+      <div class="prayer-done" id="prayer-done" style="display:none">Complete</div>
+      <div class="prayer-buttons" id="prayer-buttons">
+        <button id="btn-minus" aria-label="Subtract one">&minus;</button>
+        <button id="btn-plus" aria-label="Add one">+</button>
+      </div>
+    </div>
+
+    <button id="arrow-right" class="arrow arrow-right" aria-label="Next prayer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="dots" id="dots"></div>
+</div>
+
+<!-- Undo bar -->
+<div id="undo-bar">
+  <span id="undo-text"></span>
+  <button id="undo-btn">Undo</button>
+</div>
+
+<!-- History -->
+<div id="screen-history" class="screen">
+  <div class="history-header">
+    <h2>History</h2>
+    <button id="clear-history" class="clear-btn">Clear</button>
+  </div>
+  <div id="session-controls">
+    <div class="session-info">
+      <div id="session-timer">00:00</div>
+      <div id="session-count"></div>
+    </div>
+    <button id="session-toggle" class="session-btn">Start Session</button>
+  </div>
+  <div id="session-list"></div>
+</div>
+
+<!-- Settings -->
+<div id="screen-settings" class="screen">
+  <h2 class="screen-title">Settings</h2>
+  <div class="settings-section">
+    <h3>Backup</h3>
+    <p>Safari PWAs can lose storage. Back up regularly.</p>
+    <button id="export-btn" class="settings-btn">Export Backup</button>
+    <button id="import-trigger" class="settings-btn">Import Backup</button>
+    <input type="file" id="import-file" accept=".json">
+  </div>
+  <div class="settings-section">
+    <h3>Adjust Counts</h3>
+    <div class="reset-grid" id="reset-grid"></div>
+    <button id="save-counts-btn" class="settings-btn" style="margin-top:12px;">Save</button>
+  </div>
+  <div class="settings-section">
+    <h3>Reset</h3>
+    <button id="reset-all-btn" class="settings-btn danger">Reset to Initial Counts</button>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div id="overlay" class="overlay">
+  <div class="dialog">
+    <h3 id="dialog-title"></h3>
+    <p id="dialog-message"></p>
+    <div class="dialog-buttons">
+      <button id="dialog-cancel" class="dialog-cancel">Cancel</button>
+      <button id="dialog-confirm" class="dialog-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <button data-screen="home" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Home
+  </button>
+  <button data-screen="history">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    History
+  </button>
+  <button data-screen="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<script src="db.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
