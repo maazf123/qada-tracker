@@ -262,10 +262,10 @@
   }
 
   function cancelEdit() {
+    editingPrayer = null;
     prayerInput.style.display = 'none';
     prayerCount.style.display = '';
     editBtn.style.display = '';
-    editingPrayer = null;
   }
 
   async function commitEdit() {
