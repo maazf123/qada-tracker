@@ -51,6 +51,12 @@ html, body {
   opacity: 1;
 }
 
+#save-indicator.backed-up {
+  background: #636366;
+  color: #fff;
+  opacity: 1;
+}
+
 #save-indicator.error {
   background: var(--danger);
   color: #fff;

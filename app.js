@@ -524,9 +524,18 @@
       const data = JSON.stringify({ counts, backedUpAt: new Date().toISOString() });
       localStorage.setItem(BACKUP_KEY, data);
       tapsSinceBackup = 0;
+      showBackedUp();
     } catch (e) {
       console.warn('Auto-backup failed:', e);
     }
+  }
+
+  let backupTimeout = null;
+  function showBackedUp() {
+    saveIndicator.textContent = '\u2601 Backed up';
+    saveIndicator.className = 'backed-up';
+    clearTimeout(backupTimeout);
+    backupTimeout = setTimeout(() => { saveIndicator.className = ''; }, 2000);
   }
 
   function checkAutoBackup() {
